@@ -1,46 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>download</title>
+</head>
+<body>
+    <table cellpadding="2" cellspacing="2" width="1000px" height="20px"  style="margin:auto">
+        <th>
+            <td><a href="index.php">ADD USER</a></td>
+            <td><a href="view.php">VIEW</a></td>
+            <td><a href="update.php">UPDATE</a></td>
+            <td><a href="delete.php"> DELETE</a></td>
+            <td><a href="download.php">DOWNLOAD</a></td>
+        </th>
+    </table>
+    <form method="post">
+        <input type="submit" name="submit" value="download">
+    </form>
+
+</body>
+</html>
 <?php
-include "simple_html_dom.php";
-$table = '<table border="1">
-<tr>
-<th>Header 1</th>
-<th>Header 2</th>
-</tr>
-<tr>
-<td>row 1, cell 1</td>
-<td>row 1, cell 2</td>
-</tr>
-<tr>
-<td>row 2, cell 1</td>
-<td>row 2, cell 2</td>
-</tr>
-</table>';
+    if (isset($_POST['submit'])) {
+        header('Content-Type: text/csv');
+        header('Content-Disposition: attachment; filename="sample.csv"');
+        $cn=mysqli_connect("localhost","root","","week3");
+        $q="select * from contact_detail";
+        $result=mysqli_query($cn,$q);
+        $r=mysqli_num_rows($result);
+        $data1 = array(
+                'aaa,bbb,ccc,dddd',
+                '123,456,789',
+                '"aaa","bbb"'
+        );
 
-$html = str_get_html($table);
+        $fp = fopen('php://output', 'wb');
+        while($data=mysqli_fetch_array($result))
+        {
+            fputcsv($fp, $data);
+        }
 
-
-
-header('Content-type: application/ms-excel');
-header('Content-Disposition: attachment; filename=sample.csv');
-
-$fp = fopen("php://output", "w");
-
-foreach($html->find('tr') as $element)
-{
-    $td = array();
-    foreach( $element->find('th') as $row)  
-    {
-        $td [] = $row->plaintext;
+        fclose($fp);
     }
-    fputcsv($fp, $td);
 
-    $td = array();
-    foreach( $element->find('td') as $row)  
-    {
-        $td [] = $row->plaintext;
-    }
-    fputcsv($fp, $td);
-}
-
-
-fclose($fp);
 ?>
